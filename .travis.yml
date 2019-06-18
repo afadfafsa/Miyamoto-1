@@ -1,0 +1,37 @@
+os: windows   # Windows Server, version 1803
+language: sh  # 'language: python' is not yet supported
+
+py35-steps: &py35-steps
+  env: PATH=/c/Python35:/c/Python35/Scripts:$PATH
+  before_install:
+    - choco install python --version 3.5.4
+    - python -m pip install --upgrade pip
+
+matrix:
+  allow_failures:
+    - python: 3.5  # f-strings are available on Python >= 3.6
+  include:
+    - name: "Python 3.5: Run tests"
+      <<: *py35-steps
+      
+ deploy:
+  provider: releases
+  api_key: ${api_key}
+  file_glob: true
+  file: distrib/*
+  skip_cleanup: true
+  draft: true
+  on:
+    all_branches: true
+tags: false
+
+install:
+ - pip install cx_freeze==4.3.3
+ - pip install libyaz0
+ - pip install sarclib
+ - pip install pyqt5
+ - pip install sip
+script:
+  - py build.py
+notifications:
+email: false
