@@ -34,8 +34,9 @@ Version = MiyamotoVersion
 ################################################################
 
 # Imports
-import os, os.path, platform, shutil, sys
+import os, os.path, platform, shutil, sys, zipfile
 from cx_Freeze import setup, Executable
+from shutil import copyfile
 
 # Pick a build directory
 dir_ = 'distrib/' + PackageName
@@ -109,7 +110,16 @@ else:
     if os.path.isdir(dir_ + '/macTools'): shutil.rmtree(dir_ + '/macTools') 
     shutil.copytree('macTools', dir_ + '/macTools')
 shutil.copy('license.txt', dir_)
-shutil.copy('README.md', dir_)
 print('>> Files copied!')
 
 print('>> Miyamoto! has been frozen to %s !' % dir_)
+
+zf = zipfile.ZipFile(PackageName + ".zip", "w", zipfile.ZIP_DEFLATED)
+for dirname, subdirs, files in os.walk(dir_):
+    zf.write(dirname)
+    for filename in files:
+        os.path.abspath(os.path.join(dirname, filename))
+        zf.write(os.path.join(dirname, filename))
+zf.close()
+print('Miyamoto! has been packed as zip')
+shutil.copy(PackageName + ".zip", "distrib")
